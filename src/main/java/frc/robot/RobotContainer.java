@@ -24,6 +24,10 @@ import java.io.File;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
+import frc.robot.subsystems.Lift;
+import frc.robot.commands.moduls.lift.LowerLiftCommand;
+import frc.robot.commands.moduls.lift.RaiseLiftCommand;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -47,6 +51,10 @@ public class RobotContainer {
                         new File(Filesystem.getDeployDirectory(), "swerve"));
 
         DoubleSupplier driverXboxRightXInverted = () -> -new XboxController(OperatorConstants.kDriverControllerPort).getRightX(); 
+
+        private final Lift lift = new Lift();
+
+
         /**
          * Converts driver input into a field-relative ChassisSpeeds that is controlled
          * by angular velocity.
@@ -98,6 +106,8 @@ public class RobotContainer {
 
                 drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
 
+                driverXbox.b().whileTrue(new LowerLiftCommand(lift));
+                driverXbox.x().whileTrue(new RaiseLiftCommand(lift));
                 driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
                 driverXbox.start().whileTrue(Commands.none());
                 driverXbox.back().whileTrue(Commands.none());
