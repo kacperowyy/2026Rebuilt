@@ -34,6 +34,10 @@ public final class Constants {
     public static final double TURN_CONSTANT    = 6;
   }
 
+  public static final class LiftConstants {
+    public static final int kLiftSparkMaxPort = 18;
+  }
+
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;
     public static final double kMaxAccelerationMetersPerSecondSquared = 3;
