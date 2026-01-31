@@ -112,6 +112,7 @@ public class RobotContainer {
                 driverXbox.back().whileTrue(Commands.none());
                 driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
                 driverXbox.rightBumper().onTrue(Commands.none());
+                driverXbox.y().onTrue(drivebase.driveToPose(new Pose2d(5.0, 0.0, Rotation2d.fromDegrees(0))));
         }
 
         public void setMotorBrake(boolean brake) {
