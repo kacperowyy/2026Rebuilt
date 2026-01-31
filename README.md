@@ -51,7 +51,8 @@ The project automatically downloads these libraries (defined in `vendordeps/`):
 
 ## 🎮 Controller Inputs (Xbox Port 0)
 
-* **Left Stick:** Drive (Translation)
+* **Left Stick:** Drive 
 * **Right Stick:** Rotate
-* **Button A:** Lift DOWN (Voltage Control)
-* **Button X:** Lift UP (Voltage Control)
+* **Button X:** Lift Up
+* **Button B:** Lift Down
+* **Button A:** Reset Gyroscope 
