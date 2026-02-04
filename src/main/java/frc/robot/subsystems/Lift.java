@@ -12,9 +12,11 @@ import frc.robot.Constants.LiftConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Lift extends SubsystemBase {
+    // Define motors
     private final SparkMax liftLeftMotor = new SparkMax(LiftConstants.kLeftLiftSparkMaxPort, MotorType.kBrushed);
     private final SparkMax liftRightMotor = new SparkMax(LiftConstants.kRightLiftSparkMaxPort, MotorType.kBrushed);
 
+    // Motor configurations
     private final SparkMaxConfig liftLeftMotorConfig = new SparkMaxConfig();
     private final SparkMaxConfig liftRightMotorConfig = new SparkMaxConfig();
 
@@ -26,6 +28,7 @@ public class Lift extends SubsystemBase {
         liftRightMotor.configure(liftRightMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    // Methods to control both motors
     public void runUp() {
         liftLeftMotor.setVoltage(LiftConstants.kVoltageLift);
         liftRightMotor.setVoltage(LiftConstants.kVoltageLift);
