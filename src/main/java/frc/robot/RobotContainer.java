@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.XboxController;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.modules.shooting.Shoot;
+import frc.robot.commands.modules.shooting.SortAndPass;
+import frc.robot.commands.modules.shooting.SortAndPassReverse;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -23,6 +26,7 @@ import java.io.File;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
+import frc.robot.subsystems.Shooting;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
@@ -48,7 +52,7 @@ public class RobotContainer {
 
         DoubleSupplier driverXboxRightXInverted = () -> -new XboxController(OperatorConstants.kDriverControllerPort).getRightX(); 
 
-
+        private final Shooting shooting = new Shooting();
 
         /**
          * Converts driver input into a field-relative ChassisSpeeds that is controlled
@@ -108,7 +112,14 @@ public class RobotContainer {
                 driverXbox.start().whileTrue(Commands.none());
                 driverXbox.back().whileTrue(Commands.none());
                 driverXbox.rightBumper().onTrue(Commands.none());
-          
+                
+                // Shooting command
+                driverXbox.rightTrigger(0.4).whileTrue(new Shoot(shooting));
+
+                // Shooting commands without shooting (pov = dpad btw)
+                driverXbox.povUp().whileTrue(new SortAndPass(shooting));
+                driverXbox.povDown().whileTrue(new SortAndPassReverse(shooting));
+
                 //drive to pose
                 driverXbox.y().onTrue(drivebase.driveToClosestPose());
         }
