@@ -31,11 +31,21 @@ public class Shooting extends SubsystemBase {
         shooterMotor.configure(shooterMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    // Methods to control both motors
+    // Methods to control motors
     public void start() {
         sortingMotor.set(ShootingConstants.kPercentOutputSorting);
         passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
         shooterMotor.set(ShootingConstants.kPercentOutputShooter);
+    }
+
+    public void sortAndPass() {
+        sortingMotor.set(ShootingConstants.kPercentOutputSorting);
+        passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
+    }
+
+    public void sortAndPassReverse() {
+        sortingMotor.set(-ShootingConstants.kPercentOutputSorting);
+        passthroughMotor.set(-ShootingConstants.kPercentOutputPassthrough);
     }
 
     public void stop() {
