@@ -109,10 +109,9 @@ public class RobotContainer {
                 // Placeholders
                 driverXbox.start().whileTrue(Commands.none());
                 driverXbox.back().whileTrue(Commands.none());
-                driverXbox.rightBumper().onTrue(Commands.none());
                 
                 // Shooting command
-                driverXbox.rightTrigger(0.4).whileTrue(new Shoot(shooting));
+                driverXbox.b().whileTrue(new Shoot(shooting));
 
                 //drive to pose
                 driverXbox.y().onTrue(drivebase.driveToClosestPose());
