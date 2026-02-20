@@ -32,7 +32,7 @@ public class Shooting extends SubsystemBase {
     }
 
     // Methods to control motors
-    public void start() {
+    public void startShooting() {
         sortingMotor.set(ShootingConstants.kPercentOutputSorting);
         passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
         shooterMotor.set(ShootingConstants.kPercentOutputShooter);
