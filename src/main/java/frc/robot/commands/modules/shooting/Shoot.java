@@ -18,7 +18,7 @@ public class Shoot extends Command {
 
     @Override
     public void execute() {
-        shooting.start();   
+        shooting.startShooting();   
     }
 
     @Override
