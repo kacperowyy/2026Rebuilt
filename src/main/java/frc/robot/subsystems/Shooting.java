@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShootingConstants;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,9 +34,27 @@ public class Shooting extends SubsystemBase {
 
     // Methods to control motors
     public void startShooting() {
-        sortingMotor.set(ShootingConstants.kPercentOutputSorting);
-        passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
-        shooterMotor.set(ShootingConstants.kPercentOutputShooter);
+        // Speed up the motor slowly & Log the value of shooter motor
+        System.out.println("Shooter motor value: " + shooterMotor.get());
+
+        Runnable speedUp = () -> {
+            while (shooterMotor.get() > IntakeConstants.kPercentOutputIntake) {
+                shooterMotor.set(shooterMotor.get() - 0.05);
+                // Wait
+                try {
+                    Thread.sleep(50); // Sleep for 50 milliseconds
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                }
+            }
+            shooterMotor.set(IntakeConstants.kPercentOutputIntake);
+            sortingMotor.set(ShootingConstants.kPercentOutputSorting);
+            passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
+        };
+
+        // Speed up the motor in a separate thread to avoid blocking the main thread
+        Thread speedUpThread = new Thread(speedUp);
+        speedUpThread.start();
     }
 
     public void sortAndPass() {
@@ -57,7 +76,7 @@ public class Shooting extends SubsystemBase {
 
         Runnable slowDown = () -> {
             while (shooterMotor.get() < 0) {
-                shooterMotor.set(shooterMotor.get() + 0.01);
+                shooterMotor.set(shooterMotor.get() + 0.05);
                 // Wait
                 try {
                     Thread.sleep(50); // Sleep for 50 milliseconds
