@@ -18,24 +18,17 @@ public class IntakeDrop extends SubsystemBase {
     // Motor configurations
     private final SparkMaxConfig intakeMotorConfig = new SparkMaxConfig();
 
-    // Bottom limit switch
-    DigitalInput bottomLimitSwitch = new DigitalInput(IntakeDropConstants.kBottomIntakeDropLimitSwitchPort);
+
 
     public IntakeDrop() {
         intakeMotorConfig.inverted(true).idleMode(IdleMode.kBrake);
         intakeMotor.configure(intakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public boolean isBottomLimitSwitchPressed() {
-        return !bottomLimitSwitch.get();
-    }
+
 
     public void start() {
-        if (isBottomLimitSwitchPressed()) {
-            stop();
-        } else {
-            intakeMotor.set(IntakeDropConstants.kPercentOutputIntakeDrop);
-        }  
+        intakeMotor.set(IntakeDropConstants.kPercentOutputIntakeDrop); 
     }
 
     public void stop() {

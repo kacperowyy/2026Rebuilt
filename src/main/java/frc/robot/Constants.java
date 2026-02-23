@@ -34,11 +34,6 @@ public final class Constants {
     public static final double TURN_CONSTANT    = 6;
   }
 
-  public static final class LiftConstants {
-    public static final int kLeftLiftSparkMaxPort = 18;
-    public static final int kRightLiftSparkMaxPort = 16;
-    public static final double kVoltageLift = 11.5;
-  }
 
   public static final class IntakeConstants {
     // We will have to change these later
@@ -50,7 +45,7 @@ public final class Constants {
     // We will have to change these later
     public static final int kIntakeDropSparkMaxPort = 13;
     public static final double kPercentOutputIntakeDrop = 0.30;
-    public static final int kBottomIntakeDropLimitSwitchPort = 31;
+
   }
   public static final class ShootingConstants {
     // We will need to change these later
