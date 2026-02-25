@@ -50,7 +50,24 @@ public class Intake extends SubsystemBase {
     }
 
     public void stop() {
-        // We will later make this method slow down the motor slowly from both positive and negative values
-        intakeMotor.set(0);
+        // Slow down the motor slowly & Log the value of intake motor
+        System.out.println("Intake motor value: " + intakeMotor.get());
+
+        Runnable slowDown = () -> {
+            while (Math.abs(intakeMotor.get()) > 0.05) {
+                intakeMotor.set(intakeMotor.get() + ((intakeMotor.get() < 0) ? 0.05 : -0.05));
+                // Wait
+                try {
+                    Thread.sleep(50); // Sleep for 50 milliseconds
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                }
+            }
+            intakeMotor.set(0);
+        };
+
+        // Slow down the motor in a separate thread to avoid blocking the main thread
+        Thread slowThread = new Thread(slowDown);
+        slowThread.start();
     }
 }
