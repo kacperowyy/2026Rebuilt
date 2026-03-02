@@ -12,6 +12,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OperatorConstants;
+
+import frc.robot.commands_timed.modules.intake.*;
+import frc.robot.commands_timed.modules.shooting.*;
+
 import frc.robot.commands.modules.intake.IntakeOnCommand;
 import frc.robot.commands.modules.intake.IntakeDropCommand;
 import frc.robot.commands.modules.intake.IntakeReverseCommand;
@@ -36,6 +40,7 @@ import frc.robot.subsystems.Shooting;
 import frc.robot.subsystems.Vision.Position;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
@@ -96,6 +101,10 @@ public class RobotContainer {
                 // Configure the trigger bindings
                 configureBindings();
                 DriverStation.silenceJoystickConnectionWarning(true);
+                NamedCommands.registerCommand("Shoot", new ShootTimed(shooting, 2.0));
+                NamedCommands.registerCommand("SortAndPass", new SortAndPassTimed(shooting, 2.0));
+                NamedCommands.registerCommand("IntakeOn", new IntakeOnCommandTimed(intake, 2.0));
+                NamedCommands.registerCommand("IntakeDrop", new IntakeDropCommandTimed(intakeDrop, 2.0));
         }
 
         /**
