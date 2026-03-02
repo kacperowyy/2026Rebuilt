@@ -7,8 +7,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShootingConstants;
-
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooting extends SubsystemBase {
@@ -21,6 +22,11 @@ public class Shooting extends SubsystemBase {
     private final SparkMaxConfig sortingMotorConfig = new SparkMaxConfig();
     private final SparkMaxConfig passthroughMotorConfig = new SparkMaxConfig();
     private final SparkMaxConfig shooterMotorConfig = new SparkMaxConfig();
+
+    // Smooth smmooooth
+    private final SlewRateLimiter rateLimiter = new SlewRateLimiter(ShootingConstants.kShooterAccel);
+    private double shooterTargetSpeed = 0.0;
+
     public Shooting() {
         sortingMotorConfig.inverted(false).idleMode(IdleMode.kBrake);
         passthroughMotorConfig.inverted(false).idleMode(IdleMode.kBrake);
@@ -35,7 +41,12 @@ public class Shooting extends SubsystemBase {
     public void startShooting() {
         sortingMotor.set(ShootingConstants.kPercentOutputSorting);
         passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
-        shooterMotor.set(ShootingConstants.kPercentOutputShooter);
+        shooterTargetSpeed = ShootingConstants.kPercentOutputShooter;
+    }
+
+    @Override
+    public void periodic() {
+        shooterMotor.set(rateLimiter.calculate(shooterTargetSpeed));
     }
 
     public void sortAndPass() {
@@ -51,25 +62,6 @@ public class Shooting extends SubsystemBase {
     public void stop() {
         sortingMotor.set(0);
         passthroughMotor.set(0);
-
-        // Slow down the motor slowly & Log the value of shooter motor
-        System.out.println("Shooter motor value: " + shooterMotor.get());
-
-        Runnable slowDown = () -> {
-            while (shooterMotor.get() < 0) {
-                shooterMotor.set(shooterMotor.get() + 0.01);
-                // Wait
-                try {
-                    Thread.sleep(50); // Sleep for 50 milliseconds
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restore interrupted status
-                }
-            }
-            shooterMotor.set(0);
-        };
-
-        // Slow down the motor in a separate thread to avoid blocking the main thread
-        Thread showThread = new Thread(slowDown);
-        showThread.start();
+        shooterTargetSpeed = 0.0;
     }
 }
