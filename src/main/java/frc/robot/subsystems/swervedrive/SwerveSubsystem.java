@@ -19,6 +19,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
 import frc.robot.Constants;
+import frc.robot.subsystems.Vision.Position;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,7 +43,9 @@ import edu.wpi.first.math.util.Units;
 
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
+    private Position position;
     private List<Pose2d> targetPoses = new ArrayList<>();
+
 
     /**
      * Initialize {@link SwerveDrive} with the directory provided.
@@ -56,7 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
+        this.position = new Position(swerveDrive);
         swerveDrive.setHeadingCorrection(false);
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true,
@@ -189,6 +192,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 .forEach(it -> it.setAngle(0.0)));
     }
 
+    @Override
+    public void periodic()  {
+        position.updateOdometryWithVision();
+        SmartDashboard.putNumber("Swerve robot X:", swerveDrive.getPose().getX());
+        SmartDashboard.putNumber("Swerve robot Y:", swerveDrive.getPose().getY());
+    }
     /**
      * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
      * object.
