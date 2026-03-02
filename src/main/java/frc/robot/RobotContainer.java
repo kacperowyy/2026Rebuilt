@@ -33,6 +33,7 @@ import java.util.function.DoubleSupplier;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeDrop;
 import frc.robot.subsystems.Shooting;
+import frc.robot.subsystems.Vision.Position;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
