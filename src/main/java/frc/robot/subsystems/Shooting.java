@@ -32,7 +32,7 @@ public class Shooting extends SubsystemBase {
     }
 
     // Methods to control motors
-    public void start() {
+    public void startShooting() {
         sortingMotor.set(ShootingConstants.kPercentOutputSorting);
         passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
         shooterMotor.set(ShootingConstants.kPercentOutputShooter);
@@ -51,6 +51,25 @@ public class Shooting extends SubsystemBase {
     public void stop() {
         sortingMotor.set(0);
         passthroughMotor.set(0);
-        shooterMotor.set(0);
+
+        // Slow down the motor slowly & Log the value of shooter motor
+        System.out.println("Shooter motor value: " + shooterMotor.get());
+
+        Runnable slowDown = () -> {
+            while (shooterMotor.get() < 0) {
+                shooterMotor.set(shooterMotor.get() + 0.01);
+                // Wait
+                try {
+                    Thread.sleep(50); // Sleep for 50 milliseconds
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupted status
+                }
+            }
+            shooterMotor.set(0);
+        };
+
+        // Slow down the motor in a separate thread to avoid blocking the main thread
+        Thread showThread = new Thread(slowDown);
+        showThread.start();
     }
 }
