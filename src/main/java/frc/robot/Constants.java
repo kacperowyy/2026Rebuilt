@@ -58,9 +58,9 @@ public final class Constants {
     public static final double kShooterAccel = 4.0;
     
     // We will need to change these later
-    public static final double kPercentOutputSorting = -0.10;
-    public static final double kPercentOutputPassthrough = -0.15;
-    public static final double kPercentOutputShooter = -0.30;
+    public static final double kPercentOutputSorting = -0.20;
+    public static final double kPercentOutputPassthrough = -0.45;
+    public static final double kPercentOutputShooter = -0.55;
   }
 
   public static final class AutoConstants {
