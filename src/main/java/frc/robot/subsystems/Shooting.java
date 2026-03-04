@@ -39,14 +39,16 @@ public class Shooting extends SubsystemBase {
 
     // Methods to control motors
     public void startShooting() {
-        sortingMotor.set(ShootingConstants.kPercentOutputSorting);
-        passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
         shooterTargetSpeed = ShootingConstants.kPercentOutputShooter;
     }
 
     @Override
     public void periodic() {
         shooterMotor.set(rateLimiter.calculate(shooterTargetSpeed));
+        if (shooterMotor.get() == ShootingConstants.kPercentOutputShooter && shooterTargetSpeed == ShootingConstants.kPercentOutputShooter) {
+            sortingMotor.set(ShootingConstants.kPercentOutputSorting);
+            passthroughMotor.set(ShootingConstants.kPercentOutputPassthrough);
+        }
     }
 
     public void sortAndPass() {
