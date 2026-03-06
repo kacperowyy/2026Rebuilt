@@ -141,6 +141,7 @@ public class RobotContainer {
 
                 // Shooting command
                 driverXbox.b().whileTrue(new Shoot(shooting));
+                driverXbox.povLeft().whileTrue(new IntakeDropCloseCommand(intakeDrop));
 
                 // Shooting commands without shooting (pov = dpad btw)
                 driverXbox.povUp().whileTrue(new SortAndPass(shooting));
