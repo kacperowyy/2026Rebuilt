@@ -149,6 +149,7 @@ public class RobotContainer {
 
                 //drive to pose
                 driverXbox.y().onTrue(drivebase.driveToClosestPose());
+                driverXbox.povRight().onTrue(Commands.runOnce(() -> drivebase.getCurrentCommand().cancel()));
         }
 
         public void setMotorBrake(boolean brake) {
