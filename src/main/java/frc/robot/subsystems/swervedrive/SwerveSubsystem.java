@@ -21,6 +21,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import frc.robot.Constants;
+import frc.robot.subsystems.Vision.Aim;
 import frc.robot.subsystems.Vision.Position;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,6 +33,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 
@@ -46,6 +48,7 @@ import edu.wpi.first.math.util.Units;
 public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
     private Position position;
+    private Aim aim;
     private List<Pose2d> targetPoses = new ArrayList<>();
 
 
@@ -62,6 +65,7 @@ public class SwerveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
         this.position = new Position(swerveDrive);
+        this.aim = new Aim();
         swerveDrive.setHeadingCorrection(false);
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true,
@@ -199,6 +203,10 @@ public class SwerveSubsystem extends SubsystemBase {
         position.updateOdometryWithVision();
         SmartDashboard.putNumber("Swerve robot X:", swerveDrive.getPose().getX());
         SmartDashboard.putNumber("Swerve robot Y:", swerveDrive.getPose().getY());
+    }
+
+    public void findPoseForShoot() {
+        aim.findPoseForShoot();
     }
     /**
      * Replaces the swerve module feedforward with a new SimpleMotorFeedforward
@@ -409,4 +417,24 @@ public class SwerveSubsystem extends SubsystemBase {
         public double y;
         public double z;
     }
+
+public Command AimAndDrive() {
+    Pose2d targetAim = aim.findPoseForShoot();
+
+    if (targetAim == null) {
+        System.out.println("[SwerveSubsystem] No target found, not driving");
+        return new InstantCommand();
+    }
+
+    Pose2d currentPose = getPose();
+    double dist = currentPose.getTranslation().getDistance(targetAim.getTranslation());
+    System.out.println("[SWERVE] Current X: " + currentPose.getX() + " Y: " + currentPose.getY());
+    System.out.println("[SWERVE] Target X: " + targetAim.getX() + " Y: " + targetAim.getY());
+    System.out.println("[SWERVE] Distance to target: " + dist);
+
+    System.out.println("[SwerveSubsystem] Driving to shooting pose X: " 
+                        + targetAim.getX() + " Y: " + targetAim.getY());
+
+    return driveToPose(targetAim);
+}
 }
