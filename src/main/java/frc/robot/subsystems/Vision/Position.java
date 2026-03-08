@@ -29,12 +29,18 @@ public class Position extends SubsystemBase {
 public void updateOdometryWithVision() {
 swerveDrive.updateOdometry();
 
-    // Set heading in Limelight
-    double yaw = swerveDrive.getYaw().getDegrees();
-    LimelightHelpers.SetRobotOrientation("limelight", yaw, 0, 0, 0, 0, 0);
+    double rawYaw = swerveDrive.getPose().getRotation().getDegrees();
+
+    // Dla MT2 dodaj 180° dla czerwonej drużyny
+    double yawForMT2 = rawYaw;
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+        yawForMT2 = rawYaw + 180;
+    }
+    LimelightHelpers.SetRobotOrientation("limelight", yawForMT2, 0, 0, 0, 0, 0);
 
     // Log current yaw
-    SmartDashboard.putNumber("Vision/Gyro Yaw", yaw);
+    SmartDashboard.putNumber("Vision/Gyro Yaw", yawForMT2);
 
     // Read MegaTag2
     LimelightHelpers.PoseEstimate mt2 =
@@ -47,8 +53,8 @@ swerveDrive.updateOdometry();
     SmartDashboard.putNumber("Vision/Tag Count", mt2 != null ? mt2.tagCount : 0);
 
     // Reject invalid measurements
-    if (Math.abs(yaw) > 720) {
-        DriverStation.reportWarning("[Vision] Measurement rejected – yaw out of range: " + yaw, false);
+    if (Math.abs(yawForMT2) > 720) {
+        DriverStation.reportWarning("[Vision] Measurement rejected – yaw out of range: " + yawForMT2, false);
         SmartDashboard.putString("Vision/Reject Reason", "Yaw > 720°");
         SmartDashboard.putBoolean("Vision/Measurement Applied", false);
         return;
@@ -59,6 +65,12 @@ swerveDrive.updateOdometry();
         SmartDashboard.putBoolean("Vision/Measurement Applied", false);
         return;
     }
+
+        if (Math.abs(swerveDrive.getRobotVelocity().omegaRadiansPerSecond) > 360 * (Math.PI / 180)) {
+            SmartDashboard.putString("Vision/Reject Reason", "Rotating too fast");
+            SmartDashboard.putBoolean("Vision/Measurement Applied", false);
+            return;
+        }
 
     // Log pose before applying
     Pose2d estimatedPose = mt2.pose;
@@ -72,10 +84,11 @@ swerveDrive.updateOdometry();
         LimelightHelpers.PoseEstimate mt1 = 
             LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
-    if (mt1 != null && mt1.tagCount > 0 && mt1.rawFiducials[0].ambiguity < 0.7) {
+        if (mt1 != null && mt1.tagCount > 0
+                && mt1.rawFiducials[0].ambiguity < 0.7) {
 
             Pose2d pose = FlippingUtil.flipFieldPose(mt1.pose);
-            
+
             SmartDashboard.putNumber("Vision/First Pose X",        pose.getX());
             SmartDashboard.putNumber("Vision/First Pose Y",        pose.getY());
             SmartDashboard.putNumber("Vision/First Pose Rotation", pose.getRotation().getDegrees());
@@ -84,7 +97,6 @@ swerveDrive.updateOdometry();
 
 
             hasResetPose = true;
-            
         }
         return;
     }
