@@ -56,3 +56,4 @@ The project automatically downloads these libraries (defined in `vendordeps/`):
 
 * **Left Bumper** Reverse Intake
 * **D-pad Down** Reverse Sort & Pass
+* **D-pad Right** Cancel Drive to closest shooting pose
