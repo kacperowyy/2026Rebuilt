@@ -23,6 +23,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import frc.robot.Constants;
 import frc.robot.subsystems.Vision.Aim;
 import frc.robot.subsystems.Vision.Position;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -33,7 +34,7 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 
@@ -50,6 +51,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private Position position;
     private Aim aim;
     private List<Pose2d> targetPoses = new ArrayList<>();
+    private Command activeAimAndDriveCommand = null;
 
 
     /**
@@ -203,6 +205,10 @@ public class SwerveSubsystem extends SubsystemBase {
         position.updateOdometryWithVision();
         SmartDashboard.putNumber("Swerve robot X:", swerveDrive.getPose().getX());
         SmartDashboard.putNumber("Swerve robot Y:", swerveDrive.getPose().getY());
+
+        if (activeAimAndDriveCommand != null && !activeAimAndDriveCommand.isScheduled()) {
+            activeAimAndDriveCommand = null;
+        }
     }
 
     public void findPoseForShoot() {
@@ -243,6 +249,34 @@ public class SwerveSubsystem extends SubsystemBase {
                     true,
                     false);
         });
+    }
+
+    public void driveAndFaceTower(double translationX, double translationY) {
+        double xInput = MathUtil.applyDeadband(translationX, Constants.OperatorConstants.DEADBAND);
+        double yInput = MathUtil.applyDeadband(translationY, Constants.OperatorConstants.DEADBAND);
+
+        Translation2d translation = SwerveMath.scaleTranslation(
+            new Translation2d(
+                xInput * swerveDrive.getMaximumChassisVelocity(),
+                yInput * swerveDrive.getMaximumChassisVelocity()),
+            0.8);
+
+        double angularVelocity = calculateTowerFacingAngularVelocity();
+
+        swerveDrive.drive(translation, angularVelocity, true, false);
+    }
+
+    private double calculateTowerFacingAngularVelocity() {
+        Pose2d targetPose = aim.findPoseForShoot();
+        if (targetPose == null) {
+            return 0.0;
+        }
+
+        double headingErrorRadians = targetPose.getRotation().minus(getPose().getRotation()).getRadians();
+        return MathUtil.clamp(
+            headingErrorRadians * Constants.OperatorConstants.TURN_CONSTANT,
+            -swerveDrive.getMaximumChassisAngularVelocity(),
+            swerveDrive.getMaximumChassisAngularVelocity());
     }
 
     /**
@@ -427,18 +461,27 @@ public Command AimAndDrive() {
 
     if (targetAim == null) {
         System.out.println("[SwerveSubsystem] No target found, not driving");
-        return new InstantCommand();
+        return Commands.none();
     }
 
     Pose2d currentPose = getPose();
     double dist = currentPose.getTranslation().getDistance(targetAim.getTranslation());
-    System.out.println("[SWERVE] Current X: " + currentPose.getX() + " Y: " + currentPose.getY());
-    System.out.println("[SWERVE] Target X: " + targetAim.getX() + " Y: " + targetAim.getY());
-    System.out.println("[SWERVE] Distance to target: " + dist);
-
-    System.out.println("[SwerveSubsystem] Driving to shooting pose X: " 
-                        + targetAim.getX() + " Y: " + targetAim.getY());
+    System.out.println("[SwerveSubsystem] Driving to shooting pose X: "
+                        + targetAim.getX() + " Y: " + targetAim.getY() + " Dist: " + dist);
 
     return driveToPose(targetAim);
+}
+
+public void startAimAndDrive() {
+    cancelAimAndDrive();
+    activeAimAndDriveCommand = AimAndDrive();
+    CommandScheduler.getInstance().schedule(activeAimAndDriveCommand);
+}
+
+public void cancelAimAndDrive() {
+    if (activeAimAndDriveCommand != null) {
+        activeAimAndDriveCommand.cancel();
+        activeAimAndDriveCommand = null;
+    }
 }
 }

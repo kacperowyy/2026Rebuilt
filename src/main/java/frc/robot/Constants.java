@@ -39,7 +39,7 @@ public final class Constants {
   public static final class IntakeConstants {
     // We will have to change these later
     public static final int kIntakeSparkMaxPort = 10;
-    public static final double kPercentOutputIntake = 0.90;
+    public static final double kPercentOutputIntake = 0.50;
 
     public static final double kIntakeAccel = 4.0;
   }
@@ -62,6 +62,10 @@ public final class Constants {
     public static final double kPercentOutputSorting = -0.20;
     public static final double kPercentOutputPassthrough = -0.45;
     public static final double kPercentOutputShooter = -0.65;
+    // Distance (meters) where shooter uses exactly kPercentOutputShooter.
+    public static final double kShooterReferenceDistanceMeters = 2.0;
+    // Additional shooter output applied per meter away from reference distance.
+    public static final double kShooterPercentPerMeter = 0.25;
   }
 
   public static final class AutoConstants {

@@ -62,7 +62,7 @@ public class RobotContainer {
         private final SwerveSubsystem drivebase = new SwerveSubsystem(
                         new File(Filesystem.getDeployDirectory(), "swerve"));
 
-        DoubleSupplier driverXboxRightXInverted = () -> -new XboxController(OperatorConstants.kDriverControllerPort).getRightX(); 
+        private final DoubleSupplier driverXboxRightXInverted = () -> -driverXbox.getRightX();
 
         private final Intake intake = new Intake();
         private final IntakeDrop intakeDrop = new IntakeDrop();
@@ -84,14 +84,14 @@ public class RobotContainer {
          * Clone's the angular velocity input stream and converts it to a fieldRelative
          * input stream.
          */
-        SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
+        private final SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
                         .withControllerHeadingAxis(driverXbox::getRightX, driverXbox::getRightY).headingWhile(true);
 
         /**
          * Clone's the angular velocity input stream and converts it to a robotRelative
          * input stream.
          */
-        SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
+        private final SwerveInputStream driveRobotOriented = driveAngularVelocity.copy().robotRelative(true)
                         .allianceRelativeControl(false);
 
         /**
@@ -118,6 +118,7 @@ public class RobotContainer {
         public SwerveSubsystem getSwerve() {
     return drivebase;
 }
+
         /**
          * Use this method to define your button->command mappings. Buttons can be
          * created by
@@ -129,10 +130,10 @@ public class RobotContainer {
          */
         private void configureBindings() {
                 Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
-                Command driveFieldOrientedAnglularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
+                Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
                 Command driveRobotOrientedAngularVelocity = drivebase.driveFieldOriented(driveRobotOriented);
 
-                drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+                drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
 
                 // Zero gyroscope
                 driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
@@ -150,18 +151,28 @@ public class RobotContainer {
                 driverXbox.x().whileTrue(new IntakeDropCommand(intakeDrop));
                 driverXbox.povLeft().whileTrue(new IntakeDropCloseCommand(intakeDrop));
 
-                // Shooting command
-                supportXbox.b().whileTrue(new Shoot(shooting));
+                // Shooting command with driver translation + automatic tower facing
+                driverXbox.b().onTrue(Commands.runOnce(drivebase::cancelAimAndDrive));
+                driverXbox.b().whileTrue(
+                        Commands.runEnd(
+                                () -> {
+                                        shooting.startShooting();
+                                        drivebase.driveAndFaceTower(driverXbox.getLeftY(), driverXbox.getLeftX());
+                                },
+                                shooting::stop,
+                                shooting,
+                                drivebase));
+                driverXbox.povLeft().whileTrue(new IntakeDropCloseCommand(intakeDrop));
 
                 // Shooting commands without shooting (pov = dpad btw)
                 supportXbox.povUp().whileTrue(new SortAndPass(shooting));
                 supportXbox.povDown().whileTrue(new SortAndPassReverse(shooting));
                 
                 //drive to pose
-                supportXbox.y().onTrue(
-                        Commands.defer(() -> drivebase.AimAndDrive(), Set.of(drivebase))
-                        );
-                driverXbox.x().onTrue(Commands.runOnce(() -> drivebase.getCurrentCommand().cancel()));
+                driverXbox.y()
+                                .and(driverXbox.b().negate())
+                                .onTrue(Commands.runOnce(drivebase::startAimAndDrive));
+                driverXbox.povRight().onTrue(Commands.runOnce(this::cancelDrivebaseCurrentCommand));
         }
 
         public void setMotorBrake(boolean brake) {
@@ -258,6 +269,13 @@ public class RobotContainer {
                 String fallbackName = pickDefaultAuto(autoNames);
                 Command fallbackCommand = loadAutoCommandByName(fallbackName);
                 return fallbackCommand != null ? fallbackCommand : doNothingAuto;
+        }
+
+        private void cancelDrivebaseCurrentCommand() {
+                Command currentDriveCommand = drivebase.getCurrentCommand();
+                if (currentDriveCommand != null) {
+                        currentDriveCommand.cancel();
+                }
         }
 
         public Command getAutonomousCommand() {
