@@ -1,0 +1,274 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Intake",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "Set the IP adress mode to team number in settings",
+            "x": 768.0,
+            "y": 256.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": []
+          },
+          {
+            "title": "And lock the layout in edit to use sliders",
+            "x": 768.0,
+            "y": 384.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": []
+          }
+        ],
+        "containers": [
+          {
+            "title": "Accel",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Intake/Accel",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
+            }
+          },
+          {
+            "title": "Speed",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Number Slider",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Intake/PercentOutput",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": -1.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Shooting",
+      "grid_layout": {
+        "layouts": [
+          {
+            "title": "Shooter",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 384.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Power",
+                "x": 896.0,
+                "y": 128.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Number Slider",
+                "properties": {
+                  "topic": "/SmartDashboard/Constants/Shooting/PercentOutputShooter",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "min_value": -1.0,
+                  "max_value": 1.0,
+                  "divisions": 5,
+                  "update_continuously": true
+                }
+              },
+              {
+                "title": "Accel",
+                "x": 768.0,
+                "y": 256.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Constants/Shooting/ShooterAccel",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "Reference Distance (m)",
+                "x": 768.0,
+                "y": 256.0,
+                "width": 256.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Constants/Shooting/ReferenceDistanceMeters",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              },
+              {
+                "title": "Percent Per Meter",
+                "x": 768.0,
+                "y": 384.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Constants/Shooting/PercentPerMeter",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": true
+                }
+              }
+            ]
+          }
+        ],
+        "containers": [
+          {
+            "title": "Passing Speed",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Number Slider",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Shooting/PercentOutputPassthrough",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": -1.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
+            }
+          },
+          {
+            "title": "Sorting Speed",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Number Slider",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Shooting/PercentOutputSorting",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": -1.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Auto",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Max Speed",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Auto/MaxSpeedMetersPerSecond",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
+            }
+          },
+          {
+            "title": "Max Accel",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Auto/MaxAccelerationMetersPerSecondSquared",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
+            }
+          },
+          {
+            "title": "Max Angular Accel",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Auto/MaxAngularSpeedRadiansPerSecondSquared",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
+            }
+          },
+          {
+            "title": "Max Angular Speed",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/Auto/MaxAngularSpeedRadiansPerSecond",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Intake Drop",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "PercentOutput",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Number Slider",
+            "properties": {
+              "topic": "/SmartDashboard/Constants/IntakeDrop/PercentOutput",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": -1.0,
+              "max_value": 1.0,
+              "divisions": 5,
+              "update_continuously": true
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
