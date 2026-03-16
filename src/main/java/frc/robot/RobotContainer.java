@@ -72,13 +72,13 @@ public class RobotContainer {
          * Converts driver input into a field-relative ChassisSpeeds that is controlled
          * by angular velocity.
          */
-        private final SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                        driverXbox::getLeftY,
-                        driverXbox::getLeftX)
+        SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
+                        () -> -driverXbox.getLeftY() * 1,
+                        () -> -driverXbox.getLeftX() * 1)
                         .withControllerRotationAxis(driverXboxRightXInverted)
                         .deadband(OperatorConstants.DEADBAND)
                         .scaleTranslation(0.8)
-                        .allianceRelativeControl(true);
+                        .allianceRelativeControl(false);
 
         /**
          * Clone's the angular velocity input stream and converts it to a fieldRelative
@@ -148,8 +148,8 @@ public class RobotContainer {
                 driverXbox.leftBumper().whileTrue(new IntakeReverseCommand(intake));
 
                 // Hold right trigger for intake drop
-                supportXbox.x().whileTrue(new IntakeDropCommand(intakeDrop));
-                supportXbox.povLeft().whileTrue(new IntakeDropCloseCommand(intakeDrop));
+                driverXbox.x().whileTrue(new IntakeDropCommand(intakeDrop));
+                driverXbox.povLeft().whileTrue(new IntakeDropCloseCommand(intakeDrop));
 
                 // Shooting command with driver translation + automatic tower facing
                 driverXbox.b().onTrue(Commands.runOnce(drivebase::cancelAimAndDrive));
