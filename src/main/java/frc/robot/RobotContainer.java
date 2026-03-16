@@ -157,7 +157,7 @@ public class RobotContainer {
                         Commands.runEnd(
                                 () -> {
                                         shooting.startShooting();
-                                        drivebase.driveAndFaceTower(driverXbox.getLeftY(), driverXbox.getLeftX());
+                                        drivebase.driveAndFaceTower(-driverXbox.getLeftY(), -driverXbox.getLeftX());
                                 },
                                 shooting::stop,
                                 shooting,
