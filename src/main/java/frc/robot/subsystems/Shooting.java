@@ -29,7 +29,9 @@ public class Shooting extends SubsystemBase {
     private final SparkMaxConfig passthroughMotorConfig = new SparkMaxConfig();
     private final SparkMaxConfig shooterMotorConfig = new SparkMaxConfig();
 
-    private final SlewRateLimiter rateLimiter = new SlewRateLimiter(ShootingConstants.kShooterAccel);
+    private static double lastShooterAccel = ShootingConstants.kShooterAccel;
+    private static SlewRateLimiter rateLimiter = new SlewRateLimiter(ShootingConstants.kShooterAccel);
+
     private double shooterTargetSpeed = 0.0;
     private boolean shootingActive = false;
     private boolean feedersEnabled = false;
@@ -153,5 +155,13 @@ public class Shooting extends SubsystemBase {
 
     private double clampShooterOutput(double requestedOutput) {
         return MathUtil.clamp(requestedOutput, -1.0, 1.0);
+    }
+
+    static public void updateRateLimiter() {
+        if (lastShooterAccel == ShootingConstants.kShooterAccel) {
+            return;
+        }
+        lastShooterAccel = ShootingConstants.kShooterAccel;
+        rateLimiter = new SlewRateLimiter(ShootingConstants.kShooterAccel);
     }
 }
