@@ -99,7 +99,7 @@ public final class Constants {
   public static final class IntakeDropConstants {
     // We will have to change these later
     public static final int kIntakeDropSparkMaxPort = 13;
-    public static final double kPercentOutputIntakeDrop = 0.70;
+    public static double kPercentOutputIntakeDrop = 0.70;
 
   }
   public static final class ShootingConstants {
