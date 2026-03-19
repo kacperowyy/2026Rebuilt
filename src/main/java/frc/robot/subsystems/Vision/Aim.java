@@ -103,6 +103,10 @@ public class Aim extends SubsystemBase {
 
         // Rotation facing toward the tag
         Rotation2d targetRotation = new Rotation2d(toTag.getX(), toTag.getY());
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+            targetRotation = targetRotation.plus(Rotation2d.fromDegrees(180));
+        }
 
         Pose2d shootingPose = new Pose2d(targetTranslation, targetRotation);
 
