@@ -27,88 +27,56 @@ public class Position extends SubsystemBase {
     }
 
 public void updateOdometryWithVision() {
-swerveDrive.updateOdometry();
+    swerveDrive.updateOdometry();
 
-    double rawYaw = swerveDrive.getPose().getRotation().getDegrees();
+    double yaw = swerveDrive.getPose().getRotation().getDegrees();
+    LimelightHelpers.SetRobotOrientation("limelight", yaw, 0, 0, 0, 0, 0);
+    SmartDashboard.putNumber("Vision/Gyro Yaw", yaw);
 
-    // Dla MT2 dodaj 180° dla czerwonej drużyny
-    double yawForMT2 = rawYaw;
-    var alliance = DriverStation.getAlliance();
-    if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
-        yawForMT2 = rawYaw + 180;
-    }
-    LimelightHelpers.SetRobotOrientation("limelight", yawForMT2, 0, 0, 0, 0, 0);
+    LimelightHelpers.PoseEstimate measurement;
 
-    // Log current yaw
-    SmartDashboard.putNumber("Vision/Gyro Yaw", yawForMT2);
-
-    // Read MegaTag2
-    LimelightHelpers.PoseEstimate mt2 =
-        LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-
-        SmartDashboard.putBoolean("Vision/FirstTag", hasResetPose);
-    // Log Limelight data
-    boolean hasValidTags = mt2 != null && mt2.tagCount > 0;
-    SmartDashboard.putBoolean("Vision/Has Valid Tags", hasValidTags);
-    SmartDashboard.putNumber("Vision/Tag Count", mt2 != null ? mt2.tagCount : 0);
-
-    // Reject invalid measurements
-    if (Math.abs(yawForMT2) > 720) {
-        DriverStation.reportWarning("[Vision] Measurement rejected – yaw out of range: " + yawForMT2, false);
-        SmartDashboard.putString("Vision/Reject Reason", "Yaw > 720°");
-        SmartDashboard.putBoolean("Vision/Measurement Applied", false);
-        return;
+    if (DriverStation.isDisabled()) {
+        // Gdy disabled — używaj MT1 do kalibracji pozycji
+        measurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    } else {
+        // Gdy enabled — używaj MT2
+        measurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
     }
 
-    if (mt2 == null || mt2.tagCount == 0) {
+    if (measurement == null || measurement.tagCount == 0) {
         SmartDashboard.putString("Vision/Reject Reason", "No tags");
-        SmartDashboard.putBoolean("Vision/Measurement Applied", false);
         return;
     }
 
-        if (Math.abs(swerveDrive.getRobotVelocity().omegaRadiansPerSecond) > 360 * (Math.PI / 180)) {
-            SmartDashboard.putString("Vision/Reject Reason", "Rotating too fast");
-            SmartDashboard.putBoolean("Vision/Measurement Applied", false);
+    if (!measurement.isMegaTag2) {
+        // MT1 — wymaga minimum 2 tagów
+        if (measurement.tagCount < 2) {
+            SmartDashboard.putString("Vision/Reject Reason", "MT1 needs 2 tags");
             return;
         }
-
-    // Log pose before applying
-    Pose2d estimatedPose = mt2.pose;
-    SmartDashboard.putNumber("Vision/Pose X",        estimatedPose.getX());
-    SmartDashboard.putNumber("Vision/Pose Y",        estimatedPose.getY());
-    SmartDashboard.putNumber("Vision/Pose Rotation", estimatedPose.getRotation().getDegrees());
-    SmartDashboard.putNumber("Vision/Timestamp",     mt2.timestampSeconds);
-    SmartDashboard.putNumber("Vision/Avg Tag Dist",  mt2.avgTagDist);
-    
-    if (!hasResetPose) {
-        LimelightHelpers.PoseEstimate mt1 = 
-            LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-
-        if (mt1 != null && mt1.tagCount > 0
-                && mt1.rawFiducials[0].ambiguity < 0.7) {
-
-            Pose2d pose = FlippingUtil.flipFieldPose(mt1.pose);
-
-            SmartDashboard.putNumber("Vision/First Pose X",        pose.getX());
-            SmartDashboard.putNumber("Vision/First Pose Y",        pose.getY());
-            SmartDashboard.putNumber("Vision/First Pose Rotation", pose.getRotation().getDegrees());
-
-            swerveDrive.setGyro(new Rotation3d(0, 0, pose.getRotation().getRadians()));
-
-
-            hasResetPose = true;
+        // Reset pozycji gdy disabled
+        if (DriverStation.isDisabled()) {
+            swerveDrive.resetOdometry(measurement.pose);
+            SmartDashboard.putString("Vision/Reject Reason", "None - MT1 reset");
+            return;
         }
-        return;
+    } else {
+        // MT2 — odrzuć gdy za szybko się obraca
+        if (Math.abs(swerveDrive.getRobotVelocity().omegaRadiansPerSecond) > 360 * (Math.PI / 180)) {
+            SmartDashboard.putString("Vision/Reject Reason", "Rotating too fast");
+            return;
+        }
     }
 
-    // Apply vision measurement
-    swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-    swerveDrive.addVisionMeasurement(estimatedPose, mt2.timestampSeconds);
+    SmartDashboard.putNumber("Vision/Pose X", measurement.pose.getX());
+    SmartDashboard.putNumber("Vision/Pose Y", measurement.pose.getY());
+    SmartDashboard.putNumber("Vision/Pose Rotation", measurement.pose.getRotation().getDegrees());
 
-    SmartDashboard.putString("Vision/Reject Reason",      "None");
+    swerveDrive.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+    swerveDrive.addVisionMeasurement(measurement.pose, measurement.timestampSeconds);
+
+    SmartDashboard.putString("Vision/Reject Reason", "None");
     SmartDashboard.putBoolean("Vision/Measurement Applied", true);
-    SmartDashboard.putNumber("Vision/Updates This Match",
-        SmartDashboard.getNumber("Vision/Updates This Match", 0) + 1);
 }
 
 }
