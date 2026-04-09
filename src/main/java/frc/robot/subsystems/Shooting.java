@@ -56,7 +56,6 @@ public class Shooting extends SubsystemBase {
         }
 
         shooterTargetSpeed = getShooterSpeedFromLiveTagDistance();
-        System.out.println("[Shooting] Target shooter output: " + shooterTargetSpeed);
     }
 
     @Override
