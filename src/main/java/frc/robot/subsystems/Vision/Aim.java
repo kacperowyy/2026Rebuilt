@@ -31,7 +31,6 @@ public class Aim extends SubsystemBase {
     private Set<Integer> getTargetTags() {
         Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
         if (alliance.isEmpty()) {
-            System.out.println("[AIM] Alliance not set! Defaulting to Blue.");
             return BLUE_VALID_TAGS;
         }
         return alliance.get() == DriverStation.Alliance.Red ? RED_VALID_TAGS : BLUE_VALID_TAGS;
@@ -51,12 +50,10 @@ public class Aim extends SubsystemBase {
             LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
         if (mt2 == null) {
-            System.out.println("[AIM] mt2 is NULL");
             return null;
         }
 
         if (mt2.rawFiducials == null || mt2.rawFiducials.length == 0) {
-            System.out.println("[AIM] No AprilTags detected");
             return null;
         }
 
@@ -84,37 +81,25 @@ public class Aim extends SubsystemBase {
         }
 
         if (targetFiducial == null) {
-            System.out.println("[AIM] No reef tag detected. Visible tags:");
-            for (LimelightHelpers.RawFiducial f : mt2.rawFiducials) {
-                System.out.println("  - Tag ID: " + f.id);
-            }
             return null;
         }
 
         Pose2d robotPose = mt2.pose;
         int tagID = targetFiducial.id;
 
-        System.out.println("[AIM] Using Reef Tag ID: " + tagID);
-        System.out.println("[AIM] Robot Pose X: " + robotPose.getX() + " Y: " + robotPose.getY());
-
         Optional<Pose3d> tagPoseOptional = fieldLayout.getTagPose(tagID);
 
         if (tagPoseOptional.isEmpty()) {
-            System.out.println("[AIM] Tag ID " + tagID + " not found in fieldLayout");
             return null;
         }
 
         Pose3d fiducialPose = tagPoseOptional.get();
-
-        System.out.println("[AIM] Tag Pose X: " + fiducialPose.getX() + " Y: " + fiducialPose.getY());
 
         Translation2d tagTranslation = new Translation2d(fiducialPose.getX(), fiducialPose.getY());
 
         // Vector from robot to tag
         Translation2d toTag = tagTranslation.minus(robotPose.getTranslation());
         double distToTag = toTag.getNorm();
-
-        System.out.println("[AIM] Distance to tag: " + distToTag);
 
         double shootingDistance = 1.5; // desired distance from tag in meters
 
@@ -129,12 +114,6 @@ public class Aim extends SubsystemBase {
         Rotation2d targetRotation = new Rotation2d(toTag.getX(), toTag.getY());
         
         Pose2d shootingPose = new Pose2d(targetTranslation, targetRotation);
-
-        System.out.println("[AIM] Distance to tag: " + distToTag
-                         + (distToTag < shootingDistance ? " (too close — backing up)" : " (approaching)"));
-        System.out.println("[AIM] Shooting Pose X: " + shootingPose.getX()
-                         + " Y: " + shootingPose.getY()
-                         + " Rot: " + shootingPose.getRotation().getDegrees());
 
         SmartDashboard.putNumber("Shoot position X", shootingPose.getX());
         SmartDashboard.putNumber("Shoot position Y", shootingPose.getY());
